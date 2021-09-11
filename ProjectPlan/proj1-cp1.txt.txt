@@ -10,7 +10,7 @@ alu();
 csa_32(a:32, b:32, ci:1, co:1, ovf:1, out:32);
 
 3.mux.v
-mux(a:1, b:1, s:1, out:1); // optional
+mux(a:1, b:1, s:1, out:1);
 mux8(a:8, b:8, s:1, out:8);
 mux16(a:16, b:16, s:1, out:16);
 
@@ -22,3 +22,4 @@ full_adder(a:1, b:1, ci:1, co:1, out:1);
 
 6.rca_8.v
 rca_8(a:8, b:8, ci:1, co:1, out:8);
+rca_8_ovf(a:8, b:8, ci:1, co:1, ovf:1, out:8);
