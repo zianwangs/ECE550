@@ -1,0 +1,24 @@
+Project1 Public Interface
+Jichen Zhang: 3, 5, 6 
+ZIAN WANG: 1, 2, 4
+
+
+1.alu.v
+alu();
+
+2.csa_32.v 
+csa_32(a:32, b:32, ci:1, co:1, ovf:1, out:32);
+
+3.mux.v
+mux(a:1, b:1, s:1, out:1); // optional
+mux8(a:8, b:8, s:1, out:8);
+mux16(a:16, b:16, s:1, out:16);
+
+4.xor32_1.v
+xor32_1(a:32, b:1, out:32);
+
+5.full_adder.v 
+full_adder(a:1, b:1, ci:1, co:1, out:1);
+
+6.rca_8.v
+rca_8(a:8, b:8, ci:1, co:1, out:8);
