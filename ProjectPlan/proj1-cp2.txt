@@ -1,0 +1,42 @@
+Project Checkpoint2 Public Interface:
+Z: 3, 7, 5
+W: 2, 1, 4, 6
+
+
+1. alu.v
+/*
+assign isNotEqual = is_zero ? 0 : 1;
+assign isLessThan = overflow ? a[31] : out[31]; 
+*/
+2. sll.v
+sll(a:32, shift_amt:5, out:32);
+
+3. sra.v
+sra(a:32, shift_amt:5, out:32);
+
+4. and_32.v
+and32(a:32, b:32, out:32);
+
+5. or_32.v
+or32(a:32, b:32, out:32);
+
+6. is_zero.v
+// addsub(a:32, b:32, ci:1, co:1, ovf:1, isNotEqual:1, isLessThen:1, out:32);
+is_zero(a:32, out);
+// or_2, wire [15:0], [7:0], [3:0], [1:0];
+
+7. mux.v
+mux32_5(a:32, b:32, c:32, d:32, e:32, opcode:5, out:32); 
+// assign out = opcode[1] ? (opcode[0] ? c : b) : (opcode[2] ? (opcode[0] ? e : d) : a;
+
+/*
+for (0:31) or();
+
+module mux32_5();
+assign out = opcode[1] ? (opcode[0] ? c : b) : (opcode[2] ? (opcode[0] ? e : d) : a;
+
+assign a = opcode[4] ? (opcode[3] ? opcode[2] ? opcopde) P:
+endmodule;
+
+module 
+*/
