@@ -1,0 +1,23 @@
+Project Checkpoint3 Public Interface
+JC:1,5,6
+ZA:2,3,4
+
+
+1. regfile.v
+regfile(...);
+
+2. decoder5_32.v
+decoder5_32(in:5, out:32); 
+
+3. dffe.v
+dffe(d:1, clk:1, clr:1, en:1, q:1)
+
+4. reg32.v
+reg32(d:32, clk:1, clr:1, en:1, q:32);
+
+5. and5.v
+and5(out:1, in4:1, in3:1, in2:1, in1:1, in0:1);
+
+6. tristate.v
+tristate(in:1, ctrl:1, out:1); 
+tristate32(in:32, ctrl:1, out:32);
