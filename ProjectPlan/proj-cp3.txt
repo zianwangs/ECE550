@@ -9,8 +9,8 @@ regfile(...);
 2. decoder5_32.v
 decoder5_32(in:5, out:32); 
 
-3. dffe.v
-dffe(d:1, clk:1, clr:1, en:1, q:1)
+3. my_dffe.v
+my_dffe(d:1, clk:1, clr:1, en:1, q:1)
 
 4. reg32.v
 reg32(d:32, clk:1, clr:1, en:1, q:32);
