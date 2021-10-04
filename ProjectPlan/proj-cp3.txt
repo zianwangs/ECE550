@@ -15,7 +15,7 @@ my_dffe(d:1, clk:1, clr:1, en:1, q:1)
 4. reg32.v
 reg32(d:32, clk:1, clr:1, en:1, q:32);
 
-5. and5.v
+5. and5.v  -- REDUNDANT
 and5(out:1, in4:1, in3:1, in2:1, in1:1, in0:1);
 
 6. tristate.v
