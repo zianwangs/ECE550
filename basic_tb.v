@@ -1,123 +1,109 @@
-/*
-    Set this file as top level entity when testing, it will call your skeleton and utilize your clocks
-*/
+// set the timescale <time_unit>/<time_precision>
+`timescale 1 ns / 100 ps
 
-module skeleton_test(clock, reset, test, t_ctrl_writeEnable, t_ctrl_writeReg, t_ctrl_readRegA, t_ctrl_readRegB,
-							t_data_writeReg, t_data_readRegA, t_data_readRegB, t_test_out, t_test2_out, t_test3_out, t_test4_out,
-							o_ctrl_writeEnable, o_ctrl_writeReg, o_data_writeReg);
-    input clock, reset, test;
-	 
-    /** clock **/
-    wire imem_clock, dmem_clock, processor_clock, regfile_clock;
-     
-    //wire clock_by2, clock_by4;
-    
-    /** Clock Divider **/
-    // frequency_divider_by2 d1( clock , clock_by2 );
-    // frequency_divider_by2 d2( clock_by2 , clock_by4 );
-    wire stu_imem_clock,stu_dmem_clock,stu_processor_clock,stu_regfile_clock;
+module basic_tb(); // testbenches take no arguments
 
-    assign imem_clock = stu_imem_clock;
-    assign dmem_clock = stu_dmem_clock;
-    assign processor_clock = stu_processor_clock;
-    assign regfile_clock = stu_regfile_clock;
+reg reset, test, t_ctrl_writeEnable;
+reg [4:0] t_ctrl_writeReg, t_ctrl_readRegA, t_ctrl_readRegB;
+reg [31:0]t_data_writeReg;
+wire [31:0] t_data_readRegA, t_data_readRegB;
 
-    skeleton student_skeleton(clock, reset, stu_imem_clock, stu_dmem_clock, stu_processor_clock, stu_regfile_clock);
+reg clock;
+reg proc_done;
+
+integer num_correct;		// Number of tests that pass
+integer curr_test_num;		// Current test
+integer clock_count;		// How many times the clock has flipped
+integer clock_count_max;	// How many clock cycles to run
+
+// The test skeleton
+skeleton_test spooky(clock, reset, test, t_ctrl_writeEnable, proc_, t_ctrl_readRegA, t_ctrl_readRegB,
+							t_data_writeReg, t_data_readRegA, t_data_readRegB);
+
+// Begin Simulation
+initial begin
+	num_correct = 0;
+	curr_test_num = 1;
+	clock_count = 0;
+	clock_count_max = 1000;
+	proc_done = 0;
+	reset = 0;
+	test = 0;
+	
+	$display("@ece550:test:start");
+	clock = 1'b0;
+end
 
 
-	// Test reg file
-	input t_ctrl_writeEnable;
-    input [4:0] t_ctrl_writeReg, t_ctrl_readRegA, t_ctrl_readRegB;
-    input [31:0] t_data_writeReg;
-    output [31:0] t_data_readRegA, t_data_readRegB;
-	output t_test_out;
-	output [31:0] t_test2_out, t_test4_out;
-	output [4:0] t_test3_out;
-	output o_ctrl_writeEnable;
-	output [4:0] o_ctrl_writeReg;
-	output [31:0] o_data_writeReg;
-	 
-	// More wires
-	wire ctrl_writeEnable;
-    wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    wire [31:0] data_writeReg;
+// When proc_done is set high, run this code
+always @(posedge proc_done) begin
+		
+	// Set write enable to 0 so that the testbench never writes to the regfile
+	t_ctrl_writeEnable = 0;
 
-    /** IMEM **/
-    wire [11:0] address_imem;
-    wire [31:0] q_imem;
-    imem my_imem(
-        .address    (address_imem),            // address of data
-        .clock      (imem_clock),              // you may need to invert the clock
-        .q          (q_imem)                   // the raw instruction
-    );
+	// Set test to 1 so that the skeleton file feeds testbench inputs into the regfile
+	test = 1;
 
-    /** DMEM **/
-    wire [11:0] address_dmem;
-    wire [31:0] data;
-    wire wren;
-    wire [31:0] q_dmem;
-    dmem my_dmem(
-        .address    (address_dmem),       // address of data
-        .clock      (dmem_clock),         // may need to invert the clock
-        .data	    (data),    // data you want to write
-        .wren	    (wren),      // write enable
-        .q          (q_dmem)    // data from dmem
-    );
+	/* 
+		After all the insns finished, you will want to check the register file's content.
+		You can add more checks according to your test cases
+	*/
+	check_register("addi r1",1,65535);
 
-    /** REGFILE **/
-    wire r_ctrl_writeEnable, r_reset;
-    wire [4:0] r_ctrl_writeReg, r_ctrl_readRegA, r_ctrl_readRegB;
-    wire [31:0] r_data_writeReg;
-    wire [31:0] r_data_readRegA, r_data_readRegB;
-	 
-    mux_2_1bit	mux0(ctrl_writeEnable, t_ctrl_writeEnable, test, r_ctrl_writeEnable);
-    mux_2_5bit  mux1(ctrl_writeReg, t_ctrl_writeReg, test, r_ctrl_writeReg);
-    mux_2_5bit  mux2(ctrl_readRegA, t_ctrl_readRegA, test, r_ctrl_readRegA);
-    mux_2_5bit  mux3(ctrl_readRegB, t_ctrl_readRegB, test, r_ctrl_readRegB);
-    mux_2 		mux4(data_writeReg, t_data_writeReg, test, r_data_writeReg);
-    assign t_data_readRegA = r_data_readRegA;
-    assign t_data_readRegB = r_data_readRegB;
-	 
-    regfile my_regfile(
-        regfile_clock,
-        r_ctrl_writeEnable,
-        r_reset,
-        r_ctrl_writeReg,
-        r_ctrl_readRegA,
-        r_ctrl_readRegB,
-        r_data_writeReg,
-        r_data_readRegA,
-        r_data_readRegB
-    );
+	$display("@ece550:test:end");
+	$stop;
+		
+end
 
-    /** PROCESSOR **/
-    processor my_processor(
-        // Control signals
-        processor_clock,                          // I: The master clock
-        reset,                          // I: A reset signal
 
-        // Imem
-        address_imem,                   // O: The address of the data to get from imem
-        q_imem,                         // I: The data from imem
-
-        // Dmem
-        address_dmem,                   // O: The address of the data to get or put from/to dmem
-        data,                           // O: The data to write to dmem
-        wren,                           // O: Write enable for dmem
-        q_dmem,                         // I: The data from dmem
-
-        // Regfile
-        ctrl_writeEnable,               // O: Write enable for regfile
-        ctrl_writeReg,                  // O: Register to write to in regfile
-        ctrl_readRegA,                  // O: Register to read from port A of regfile
-        ctrl_readRegB,                  // O: Register to read from port B of regfile
-        data_writeReg,                  // O: Data to write to for regfile
-        r_data_readRegA,                // I: Data from port A of regfile
-        r_data_readRegB                 // I: Data from port B of regfile
-    );
-	 
-    assign o_ctrl_writeEnable = ctrl_writeEnable;
-    assign o_ctrl_writeReg = ctrl_writeReg;
-    assign o_data_writeReg = data_writeReg;
-
+// Always increment the clock, and set proc_done when we reach clock_count_max
+always begin
+	#20 clock = ~clock; 
+	clock_count = clock_count + 1;
+	if (clock_count == clock_count_max * 2)
+		proc_done = 1;
+end
+	
+	
+// Task to check that register 'read_reg' has the value 'value'
+// If it was correct, increment the number of correct values
+task check_register;
+	input [8*15:1] test_name;	// The name of the test
+	input [4:0] read_reg;		// The register to check
+	input [31:0] value;			// The value that should be in the register
+	
+	begin
+	
+		t_ctrl_readRegA = read_reg;
+		
+		@(negedge clock);
+		if (t_data_readRegA == value) begin
+			$display("@ece550:test:start");
+			$display(
+				"@ece550:test:data { \"name\": \"Test %d\", \"status\": \"PASS\", \"data\": { \"time\": \"%t\", \"testname\": \"%s\", \"expected\": \"%3d\", \"actual\": \"%3d\" } }",
+				curr_test_num,
+				$time,
+				test_name,
+				value,
+				t_data_readRegA
+			);
+			$display("@ece550:test:end");
+			num_correct = num_correct + 1;
+		end else begin
+			$display("@ece550:test:start");
+			$display(
+				"@ece550:test:data { \"name\": \"Test %d\", \"status\": \"FAIL\", \"data\": { \"time\": \"%t\", \"testname\": \"%s\", \"expected\": \"%3d\", \"actual\": \"%3d\" } }",
+				curr_test_num,
+				$time,
+				test_name,
+				value,
+				t_data_readRegA
+			);
+			$display("@ece550:test:end");
+		end
+		
+		curr_test_num = curr_test_num + 1;
+	end
+endtask
+	
 endmodule
