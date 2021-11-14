@@ -9,8 +9,9 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,iadd,insn, r1, d1, r2, d2,am,di,doo,w);
     input clock, reset;
+
     /* 
         Create four clocks for each module from the original input "clock".
         These four outputs will be used to run the clocked elements of your processor on the grading side. 
@@ -19,7 +20,18 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
-
+	 phase_clock phase_clock_pc(clock, 0, processor_clock);
+	 phase_clock phase_clock_imem(clock, 1, imem_clock);
+	 phase_clock phase_clock_dmem(clock, 3, dmem_clock);
+	 assign regfile_clock = processor_clock;
+	 //phase_clock phase_clock_regfile(clock, 0, regfile_clock);
+    
+	 
+	 //Test
+	 output[4:0] r1, r2;
+	 output[31:0] d1, d2, iadd, insn, am, di, doo, w;
+	 
+	 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
@@ -39,11 +51,11 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     wire wren;
     wire [31:0] q_dmem;
     dmem my_dmem(
-        .address    (/* 12-bit wire */),       // address of data
+        .address    (address_dmem),       // address of data
         .clock      (dmem_clock),                  // may need to invert the clock
-        .data	    (/* 32-bit data in */),    // data you want to write
-        .wren	    (/* 1-bit signal */),      // write enable
-        .q          (/* 32-bit data out */)    // data from dmem
+        .data	    (data),    // data you want to write
+        .wren	    (wren),      // write enable
+        .q          (q_dmem)    // data from dmem
     );
 
     /** REGFILE **/
@@ -63,6 +75,8 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         data_readRegA,
         data_readRegB
     );
+
+	 
 
     /** PROCESSOR **/
     processor my_processor(
@@ -90,4 +104,16 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         data_readRegB                   // I: Data from port B of regfile
     );
 
+	 
+	 // Test
+	 assign r1 = ctrl_readRegA;
+	 assign r2 = ctrl_readRegB;
+	 assign d1 = data_readRegA;
+	 assign d2 = data_readRegB;
+	 assign iadd = address_imem;
+	 assign insn = q_imem;
+	 assign am = address_dmem;
+	 assign di = data;
+	 assign doo = q_dmem;
+	 assign w = data_writeReg;
 endmodule
